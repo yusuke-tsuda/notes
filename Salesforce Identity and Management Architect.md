@@ -2,13 +2,13 @@
 
 ## TODO
 
-- [ ] YouTube視聴
+- [x] YouTube視聴
 - [ ] ハンズオン実施
 - [ ] 問題集を解く
 - [ ] SAMLアサーションの具体的な内容を確認する
 - [ ] SAMLプロトコルにおいてSPとidPに設定する証明書について勉強する
   - [ ] JWTの署名とかもあわせて勉強
-- [ ] APEXを簡単に勉強
+- [ ] APEX、LWCを簡単に勉強
 
 ## YouTubeメモ
 
@@ -136,8 +136,6 @@ sequenceDiagram
 
 **OAuth 2.0の主要フロー** ※SFでの呼称が異なるので合わせて記載
 
-# **OAuth 2.0 / 認証の主要フロー（拡張）**
-
 | 一般的な呼称 | SFでの呼称 | 具体的な用途・ユースケース |
 | :--- | :--- | :--- |
 | **Authorization Code** | **Webサーバーフロー** | サーバーサイド言語で構築された**自社WebアプリやSaaS**から、**ユーザー個人の権限**でSalesforce APIを実行する場合。**Client Secretを安全に保持できる**構成で利用。 |
@@ -158,7 +156,7 @@ sequenceDiagram
     - 取り消し用エンドポイントにトークンを送付することで取り消しする
     - 管理者が画面から取り消すことも可能
   - PKCE (ピクシー)
-    - モバイルアプリなどで認可コードの横取りを棒する
+    - モバイルアプリなどで認可コードの横取りを防止する
     - クライアントが認証時と認可時に同じかをcode_challenge, code_velifierを利用して確かめるフロー
 
 **PKCEフロー**
@@ -197,3 +195,96 @@ sequenceDiagram
     App-->>User: 16. 画面表示
 ```
 ---
+
+- OpenID Connect
+  - OAuth2.0をベースに構築されたSSOプロトコル
+  - IDトークンという身元照会用のトークンを発行することがポイント
+  - Salesforceでは認証プロバイダー機能でOpenID Connectを設定できる
+    - アプリケーション側がOIDCに対応していないならカスタムAPEXを利用する
+
+**OIDC Flow**
+
+---
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as ユーザー
+    participant Client as クライアントアプリ<br>(Web / モバイル)
+    participant AuthServer as 認可サーバー<br>(IdP: Google / Entra ID 等)
+    participant ResourceServer as リソースサーバー<br>(API)
+
+    Note over User, ResourceServer: 1. 認可リクエスト（認証の要求）
+    User->>Client: アプリにアクセス / ログインボタン押下
+    Client->>AuthServer: 認証リクエスト送信<br>(response_type=code, client_id, scope=openid profile, redirect_uri)
+
+    Note over User, ResourceServer: 2. ユーザーの認証と同意
+    AuthServer->>User: ログイン画面の表示（ID/パスワード・MFA等）
+    User->>AuthServer: 資格情報の入力
+    AuthServer->>User: アクセス許可の確認（同意画面）
+    User->>AuthServer: 同意
+
+    Note over User, ResourceServer: 3. 認可コードの返却
+    AuthServer->>Client: リダイレクト + 認可コード (authorization_code) 返却
+
+    Note over User, ResourceServer: 4. トークン交換（バックチャネル）
+    Client->>AuthServer: トークンリクエスト送信<br>(code, client_secret, redirect_uri)
+    AuthServer->>Client: **IDトークン (JWT)** + アクセストークン返却
+
+    Note over User, ResourceServer: 5. 認証の検証とAPIアクセス
+    Client->>Client: IDトークン（署名・有効期限）を検証してユーザー識別子（sub）を取得
+    Client->>ResourceServer: APIリクエスト (Bearer アクセストークン)
+    ResourceServer->>Client: 保護されたリソースを返却
+    Client->>User: ログイン完了・画面表示
+```
+---
+
+- Salesforce IAMの基本機能
+  - MFA：本番環境（Experience Cloudを利用する外部ユーザーの除く）は必須
+    - AuthアプリやYubikey、FaceIDなどの組み込み生体認証が使える
+    - U2F：物理的なキーを挿入する方式
+    - WebAuthn
+    - FIDO2
+  - Lightning Login
+    - パスワードレスでSF Authアプリを利用してログイン
+    - MFAを満たしているとみなされる
+  - 証明書ベース
+    - クライアント証明書をデバイスにインストールして認証
+  - ログインフロー
+    - 認証プロセス中にカスタムロジックを組み込む
+    - 特定のIPからの接続の時のみセッションベースの権限セットを与えるなど（セッション切れ時に権限セットははく奪）
+  - SCIM
+    - ID管理規格
+    - REST APIでユーザー情報を扱える
+  - 接続アプリケーションのユーザープロビジョニング
+  - アプリケーションランチャーに各アプリを置けばSSOできる
+- Experience Cloud
+  - SFのデータとシームレスに統合できるwebサイトを構築できる機能（主にB2B向けのポータルサイト）
+    - 例えばイベント管理系の会社がSFを導入したとして、チケット購入サイトをExperience Cloudで構築してデータはSFオブジェクトに保持みたいな感じ
+  - IAM関連
+    - Identity Only：ID管理特化ライセンス
+    - External Identity：Experience Cloudを利用する外部向けライセンス
+    - ID検証クレジットアドオンライセンス：SMSを利用した検証用の追加ライセンス
+  - セルフ登録
+    - ポータルがある前提で、顧客やパートナーが自身でアカウント登録できる機能
+    - プロファイルの設定なども自動化可能
+  - 動的URLによるIDページのブランド設定
+    - ユーザーの属性に応じてユーザーに最適なページを表示する機能
+  - パスワードレスログイン
+    - パスワード管理無しでSMS認証などでログインできる
+    - こういった機能を実装するためのAPEXインターフェースが用意されているので、APEXクラスとして実装する
+  - ヘッドレスAPI
+- Summer24での補足
+  - 代理認証：外部認証システムが認証を行う仕組み
+    - SFでユーザー名を入力するとSFは外部認証サーバーに流す
+    - SOAPベースでRESTはない
+    - SAMLがないときに役に立つ
+    - 認証情報が外部にあるので、SF上でパスワードリセットできない
+  - Identity Connect
+    - Active DierctoryからSFへユーザーの同期をできる機能
+    - 廃止済み（試験には出る）、EntraIDなどを利用して同様の機能を実現できる
+  - Experience Cloud組み込みログイン（非推奨）
+    - Experience Cloudのログインを外部サイトに統合する機能
+    - 現在はOAuthでの
+  - CANVAS
+    - 外部アプリとSFを統合する機能
+    - LWCが一般的で優先度がひくい
