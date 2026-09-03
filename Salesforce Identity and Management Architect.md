@@ -3,9 +3,10 @@
 ## TODO
 
 - [x] YouTube視聴
-- [ ] ハンズオン実施
+- [ ] ハンズオン実施（[こちらのTrailmix](https://trailhead.salesforce.com/ja/users/strailhead/trailmixes/architect-identity-and-access-management)）
 - [ ] 問題集を解く
 - [ ] SAMLアサーションの具体的な内容を確認する
+  - [ ] Axiomで実際にやってみた中身を見る（[こちらのハンズオン](https://trailhead.salesforce.com/ja/content/learn/modules/identity_login/identity_login_sso)）
 - [ ] SAMLプロトコルにおいてSPとidPに設定する証明書について勉強する
   - [ ] JWTの署名とかもあわせて勉強
 - [ ] APEX、LWCを簡単に勉強
