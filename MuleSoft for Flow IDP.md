@@ -151,5 +151,5 @@ autonumber
 ![alt text](imgs/受注レコードページ.png)
 
 - レコードページに戻ってプレビューが表示されることを確認
-- 
+
 ![alt text](imgs/発注書プレビューサンプル.png)
