@@ -11,13 +11,15 @@
 - データマスクはユーザーグループと関数で実行する
 
 ```sql
---doctorグループにだけ項目が見えるようにする関数
+-- doctorsグループにだけ項目が見えるようにする関数
 CREATE FUNCTION not_doctor_mask(val STRING)
 RETURN
 CASE
   WHEN is_account_group_member('doctors') THEN val
   ELSE 'CONFIDENTIAL'
-END
-```
+END;
 
-  - これをVIEWで`SELECT not_doctor_mask(culumn_name) FROM ...`として利用することでマスクする。
+-- VIEWで関数を利用することでマスクする
+CREATE VIEW patient_masked_view AS
+SELECT id, not_doctor_mask(name) FROM patient_records;
+```
