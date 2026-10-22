@@ -23,3 +23,5 @@ END;
 CREATE VIEW patient_masked_view AS
 SELECT id, not_doctor_mask(name) FROM patient_records;
 ```
+
+## Databricks Asset Bundles
