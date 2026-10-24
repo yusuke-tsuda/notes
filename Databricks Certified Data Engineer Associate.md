@@ -24,6 +24,13 @@ CREATE VIEW patient_masked_view AS
 SELECT id, not_doctor_mask(name) FROM patient_records;
 ```
 
+- 外部テーブルを管理テーブルに昇格させるALTER文は引っかかりやすいので注意
+  - `ALTER TABLE xxx SET MANAGED; `
+
+- df.summary()関数
+  - 平均値、最大値、最小値など一通りの統計データを出力してくれるカラム
+  - 引数でカラムを指定する（引数が空だと全カラムの統計情報を出力）
+
 ## Databricks Asset Bundles
 
 - 基本ファイル
