@@ -25,3 +25,8 @@ SELECT id, not_doctor_mask(name) FROM patient_records;
 ```
 
 ## Databricks Asset Bundles
+
+- 基本ファイル
+  - ./databricks.yml：リリースターゲットなどのDABsの基本設定を記載
+  - ./resources/xx.job.yml, xx.paipeline.yml：ジョブやETLパイプラインの定義を記載
+  - ./src：SQLファイル、Pythonファイル、パイプラインの処理などのソースコードを記載
