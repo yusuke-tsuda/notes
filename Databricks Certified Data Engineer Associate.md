@@ -13,6 +13,12 @@
     - 上手く使えば必要なファイルだけにアクセスできるので処理が早くなる
     - 一方でカラムの値に偏りがあるような場合（data skew）、joinやgroup byなどのシャッフル処理が遅くなる可能性もある
 
+- Databricksと外部ストレージの接続
+  - 自動セットアップ
+    - [自動セットアップの方法](https://docs.databricks.com/aws/ja/connect/unity-catalog/cloud-storage/s3/automatedsetups3)
+    - [IAM権限の委譲](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies-temporary-delegation.html)
+  - 手動セットアップ
+    - [手動セットアップの方法](https://docs.databricks.com/aws/ja/connect/unity-catalog/cloud-storage/s3/s3-external-location-manual)
 ## 構文
 - データマスクはユーザーグループと関数で実行する
 
